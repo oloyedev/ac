@@ -6,17 +6,15 @@ import random, string
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# Configure MySQL connection using environment variables
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Configure email settings using environment variables
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
@@ -29,10 +27,11 @@ mail = Mail(app)
 # Define MySQL table structure
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name= db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     complaint = db.Column(db.Text, nullable=False)
     ticket_number = db.Column(db.String(10), unique=True, nullable=False)
-    status = db.Column(db.String(10), default="pending")  # 'pending' or 'ok'
+    status = db.Column(db.String(10), default="pending") 
 
 # Initialize MySQL tables
 with app.app_context():
@@ -47,7 +46,7 @@ def generate_ticket():
 def submit_complaint():
     data = request.json
     ticket = generate_ticket()
-    new_complaint = Complaint(email=data['email'], complaint=data['complaint'], ticket_number=ticket)
+    new_complaint = Complaint(email=data['email'], name=data['name'], complaint=data['complaint'], ticket_number=ticket)
     db.session.add(new_complaint)
     db.session.commit()
 
